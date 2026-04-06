@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,28 +14,30 @@
 
     <div class="container">
         <div class="sidebar">
-            <a href="index.html" class="tab-link">1. Fundamentos de Jogos</a>
+            <a href="index.html" class="tab-link">1. Fundamentos e Arquitetura</a>
             <a href="matematica.html" class="tab-link active">2. Matemática Aplicada</a>
-            <a href="algoritmos.html" class="tab-link">3. Algoritmos Básicos</a>
-            <a href="pygame.html" class="tab-link">4. Python & Pygame</a>
+            <a href="algoritmos.html" class="tab-link">3. Algoritmos e IA</a>
+            <a href="pygame.html" class="tab-link">4. Classes e Pygame</a>
+            <a href="atividade.html" class="tab-link">5. Atividade Prática</a>
         </div>
 
         <div class="content-area">
             <h2>2. Fundamentos Matemáticos</h2>
-            <p>Em um jogo Top-Down, a geometria e a trigonometria comandam todas as ações.</p>
+            <p>Em um jogo Top-Down, onde visão do jogador está posicionada de cima para baixo, a geometria e a trigonometria comandam as ações físicas do jogo.</p>
 
-            <h3>O Teorema de Pitágoras e as "Zonas de Conforto"</h3>
-            <p>Usamos o Teorema de Pitágoras (<code>math.hypot</code>) para calcular a distância exata entre as entidades. Isso nos permitiu criar "Zonas de Conforto" para a Inteligência Artificial:</p>
+            <h3>O Teorema de Pitágoras e Zonas de Ação</h3>
+            <p>Usamos o Teorema de Pitágoras (<code>math.hypot(dx, dy)</code>) para calcular a distância exata entre as entidades. Vemos isso aplicado em vários métodos:</p>
             <ul>
-                <li><strong>Joventino:</strong> Se a distância for <code>> 80</code>, ele anda. Caso contrário, ele para (para não esbarrar no jogador).</li>
-                <li><strong>Inimigos:</strong> Se a distância for <code>> 150</code>, eles avançam. Se chegar a 150, eles param de andar e focam apenas em atirar, mantendo uma distância segura.</li>
+                <li>Na classe <strong>Aliado</strong> (<code>atualizar()</code>): Se a distância for <code>> 80</code>, ele anda em direção ao jogador. Se for menor, ele para.</li>
+                <li>No <strong>Combate Corpo-a-Corpo</strong>: O soco só acerta se a distância entre o jogador e o inimigo for menor ou igual ao alcance da arma (40 pixels).</li>
             </ul>
 
-            <h3>Trigonometria: Apontando e Movendo (Seno, Cosseno e Atan2)</h3>
-            <p>Usamos a função <code>math.atan2(dy, dx)</code> para descobrir o ângulo exato em que o alvo está. Depois, para mover a bala (ou o personagem inimigo) nessa diagonal perfeita, multiplicamos a velocidade pelo <strong>Cosseno</strong> do ângulo (para o eixo X) e pelo <strong>Seno</strong> (para o eixo Y).</p>
+            <h3>Trigonometria: Atan2, Seno e Cosseno</h3>
+            <p>Para o desenho da arma giratória no método <code>desenhar()</code> da classe <code>Entidade</code>, e no cálculo da física do <code>Projetil</code>, precisamos descobrir o ângulo de visão.</p>
+            <p>Usamos <code>math.atan2(y, x)</code> para descobrir o ângulo (em radianos) entre o atirador e o alvo. Na hora de mover o tiro na diagonal perfeitamente calculada, multiplicamos a velocidade da arma pelo <strong>Cosseno</strong> (para mover no eixo X) e pelo <strong>Seno</strong> (para mover no eixo Y):</p>
             <pre><code>
-dx = math.cos(angulo) * velocidade
-dy = math.sin(angulo) * velocidade
+self.dx = math.cos(angulo) * self.arma["vel_tiro"]
+self.dy = math.sin(angulo) * self.arma["vel_tiro"]
             </code></pre>
         </div>
     </div>

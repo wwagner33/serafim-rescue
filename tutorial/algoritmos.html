@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,29 +14,29 @@
 
     <div class="container">
         <div class="sidebar">
-            <a href="index.html" class="tab-link">1. Fundamentos de Jogos</a>
+            <a href="index.html" class="tab-link">1. Fundamentos e Arquitetura</a>
             <a href="matematica.html" class="tab-link">2. Matemática Aplicada</a>
-            <a href="algoritmos.html" class="tab-link active">3. Algoritmos Básicos</a>
-            <a href="pygame.html" class="tab-link">4. Python & Pygame</a>
+            <a href="algoritmos.html" class="tab-link active">3. Algoritmos e IA</a>
+            <a href="pygame.html" class="tab-link">4. Classes e Pygame</a>
+            <a href="atividade.html" class="tab-link">5. Atividade Prática</a>
         </div>
 
         <div class="content-area">
             <h2>3. Algoritmos e Lógicas de IA</h2>
             
             <h3>Steering Behaviors (Perseguição Básica)</h3>
-            <p>O aliado Joventino e os inimigos não se movem magicamente. Eles usam um algoritmo clássico de perseguição:</p>
+            <p>Os métodos <code>mover()</code> (do Inimigo) e <code>atualizar()</code> (do Aliado) usam um algoritmo clássico de perseguição linear usando vetores:</p>
             <ol>
-                <li>Descobrem as coordenadas X e Y do alvo (Jogador).</li>
-                <li>Calculam a distância total até ele.</li>
-                <li>Normalizam o vetor (dividem o DX e DY pela distância total).</li>
-                <li>Multiplicam o resultado pela própria velocidade. Isso faz com que caminhem numa linha reta exata até o alvo em passos calculados.</li>
+                <li>Calculam a distância total até o alvo usando a hipotenusa.</li>
+                <li><strong>Normalizam o vetor</strong> dividindo a distância nos eixos (DX e DY) pela distância total.</li>
+                <li>Multiplicam o resultado pela <code>velocidade</code>. O personagem andará em linha reta exata até o alvo sem acelerar bizarramente nas diagonais.</li>
             </ol>
 
-            <h3>Algoritmo de Auto-Mira Dinâmica</h3>
-            <p>Tanto o Jogador quanto o Joventino procuram o inimigo mais próximo. O algoritmo varre a lista de inimigos presentes <strong>na mesma sala</strong> e, usando a função matemática de hipotenusa, filtra e trava a mira no alvo com a menor distância geométrica.</p>
+            <h3>Algoritmo de Auto-Mira (Nearest Neighbor)</h3>
+            <p>O jogo implementa um sistema inteligente e otimizado de assistência de mira. Ele cria uma lista (usando <i>List Comprehension</i> no Python) apenas com os inimigos que compartilham o mesmo <code>sala_id</code> do jogador. Após isso, a função nativa <code>min()</code> encontra o alvo com a menor distância geométrica e "trava" o vetor de direção nele.</p>
 
-            <h3>Algoritmo do Spawn Seguro (Prevenção de Bugs)</h3>
-            <p>Para impedir que os inimigos "nasçam" dentro de caixas, criamos um algoritmo de validação em laço <code>while</code>. Ele sorteia uma coordenada X/Y, cria um retângulo temporário e testa a colisão. Se bater em um móvel, ele descarta a posição e sorteia outra, limitando-se a 100 tentativas para não travar o processamento do computador.</p>
+            <h3>Algoritmo de Spawn Seguro</h3>
+            <p>A função aninhada <code>espalhar_inimigos()</code> garante que inimigos nunca "nasçam" dentro de paredes. Ela usa um laço <code>while</code> que sorteia um ponto (X, Y) aleatório, simula a <i>hitbox</i> (caixa de colisão) do inimigo e checa se bate com a lista de <code>obstaculos</code>. Se bater, rejeita e tenta de novo (limitado a 100 tentativas de segurança).</p>
         </div>
     </div>
 </body>

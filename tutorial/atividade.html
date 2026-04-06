@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atividade - Serafim Rescue Team</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>🎮 Serafim Rescue Team: Documentação & Tutorial</h1>
+        <p>Aprenda a matemática, os algoritmos e a engenharia por trás do jogo.</p>
+    </header>
+
+    <div class="container">
+        <div class="sidebar">
+            <a href="index.html" class="tab-link">1. Fundamentos e Arquitetura</a>
+            <a href="matematica.html" class="tab-link">2. Matemática Aplicada</a>
+            <a href="algoritmos.html" class="tab-link">3. Algoritmos e IA</a>
+            <a href="pygame.html" class="tab-link">4. Classes e Pygame</a>
+            <a href="atividade.html" class="tab-link active">5. Atividade Prática</a>
+        </div>
+
+        <div class="content-area">
+            <h2>5. Atividade Prática: Hands-on!</h2>
+            <p>Agora que você entende como o código funciona nos bastidores, é hora de sujar as mãos. Como desenvolvedor de jogos, alterar regras e balancear o projeto é a melhor forma de fixar o conhecimento.</p>
+
+            <h3>Passo 1: Baixar o Código</h3>
+            <p>Abra o seu Terminal ou Prompt de Comando e clone o repositório do jogo usando o Git:</p>
+            <pre><code>git clone https://github.com/wwagner33/serafim-rescue.git
+cd serafim-rescue</code></pre>
+
+            <p>Não se esqueça de instalar a biblioteca do Pygame, caso não a tenha: <code>pip install pygame</code></p>
+
+            <hr style="border-color:#444; margin: 20px 0;">
+
+            <h3>Passo 2: Missões de Melhoria</h3>
+            <p>Abra o código clonado no seu editor de código favorito (como o VS Code) e tente completar as 3 tarefas abaixo:</p>
+
+            <h4>🎯 Desafio 1: Balanceamento Extremo</h4>
+            <p><strong>Objetivo:</strong> Mude a dificuldade do jogo. Encontre a variável <code>VIDA_BASE_INIMIGO</code> no arquivo principal e aumente-a de 50 para 100. Perceba como a matemática garante que a vida do Jogador (que é 1.5x maior) escale automaticamente.</p>
+
+            <h4>🎯 Desafio 2: A Nova Arma do Joventino</h4>
+            <p><strong>Objetivo:</strong> O seu aliado atual usa um Revolver de 6 balas. Abra o arquivo <code>config.py</code> e adicione uma nova arma ao dicionário <code>ARMAS</code> chamada "Fuzil" (com alto dano e alcance). Depois, no arquivo <code>main.py</code>, altere o atributo <code>self.arma_atual</code> na inicialização da classe <code>Aliado</code> para que ele empunhe essa nova arma no lugar do Revolver.</p>
+
+            <h4>🎯 Desafio 3: Alteração de Level Design</h4>
+            <p><strong>Objetivo:</strong> Crie mais abrigo para se proteger na primeira sala do jogo. Na função <code>gerar_cenario()</code> do arquivo principal, procure a lista chamada <code>obstaculos</code>. Adicione um novo objeto <code>pygame.Rect()</code> a esta lista passando as coordenadas para criar um móvel (quadrado ou retangular) novo dentro da primeira sala.</p>
+
+            <p style="margin-top: 30px; font-weight: bold; color: var(--accent-color);">Boa sorte e bom código! O código é livre, sinta-se à vontade para expandir o jogo como a sua imaginação mandar!</p>
+        </div>
+    </div>
+</body>
+</html>

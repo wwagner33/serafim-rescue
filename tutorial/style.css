@@ -105,3 +105,12 @@ pre {
     overflow-x: auto;
     border-left: 4px solid var(--accent-color);
 }
+
+footer {
+    font-size: small;
+    text-align: center;
+    padding: 5px;
+    background-color: var(--secondary-bg);
+    border-top: 3px solid var(--accent-color);
+    margin-top: 5px;
+}
