@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pygame - Serafim Rescue Team</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>🎮 Serafim Rescue Team: Documentação & Tutorial</h1>
+        <p>Aprenda a matemática, os algoritmos e a engenharia por trás do jogo.</p>
+    </header>
+
+    <div class="container">
+        <div class="sidebar">
+            <a href="index.html" class="tab-link">1. Fundamentos de Jogos</a>
+            <a href="matematica.html" class="tab-link">2. Matemática Aplicada</a>
+            <a href="algoritmos.html" class="tab-link">3. Algoritmos Básicos</a>
+            <a href="pygame.html" class="tab-link active">4. Python & Pygame</a>
+        </div>
+
+        <div class="content-area">
+            <h2>4. Recursos do Python e Pygame</h2>
+            
+            <h3>Sonoplastia (Mixer) e Tratamento de Erros</h3>
+            <p>O módulo <code>pygame.mixer</code> lida com o áudio. Usamos duas ferramentas distintas:</p>
+            <ul>
+                <li><code>mixer.music</code>: Focado em tocar arquivos <strong>.mp3</strong> longos em loop (trilha sonora), poupando memória RAM.</li>
+                <li><code>mixer.Sound</code>: Focado em arquivos <strong>.wav</strong> curtos, ideais para efeitos sonoros (tiros e portas) que precisam ser processados sem atraso.</li>
+            </ul>
+            <p>Usamos blocos de <code>try...except</code> (Tratamento de Exceções nativo do Python) para carregar os sons. Se o usuário esquecer de baixar o arquivo .mp3, o bloco <i>except</i> impede que o jogo sofra um crash (fechamento abrupto) e permite jogar sem áudio.</p>
+
+            <h3>Interfaces Transparentes (Overlay)</h3>
+            <p>Para criar a tela de Vitória/Derrota que escurece a fase no fundo, criamos uma <strong>Surface</strong> no Pygame ativando a flag <code>pygame.SRCALPHA</code>.</p>
+            <p>Isso permite que a cor preta <code>(0, 0, 0)</code> receba um quarto valor (o canal Alpha), ex: <code>(0, 0, 0, 180)</code>. Assim, o Pygame desenha um retângulo preto com 180 níveis de opacidade (sendo 255 totalmente sólido), criando o clássico efeito de vidro escurecido de menu.</p>
+        </div>
+    </div>
+</body>
+</html>

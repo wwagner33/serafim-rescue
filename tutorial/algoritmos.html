@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algoritmos - Serafim Rescue Team</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>🎮 Serafim Rescue Team: Documentação & Tutorial</h1>
+        <p>Aprenda a matemática, os algoritmos e a engenharia por trás do jogo.</p>
+    </header>
+
+    <div class="container">
+        <div class="sidebar">
+            <a href="index.html" class="tab-link">1. Fundamentos de Jogos</a>
+            <a href="matematica.html" class="tab-link">2. Matemática Aplicada</a>
+            <a href="algoritmos.html" class="tab-link active">3. Algoritmos Básicos</a>
+            <a href="pygame.html" class="tab-link">4. Python & Pygame</a>
+        </div>
+
+        <div class="content-area">
+            <h2>3. Algoritmos e Lógicas de IA</h2>
+            
+            <h3>Steering Behaviors (Perseguição Básica)</h3>
+            <p>O aliado Joventino e os inimigos não se movem magicamente. Eles usam um algoritmo clássico de perseguição:</p>
+            <ol>
+                <li>Descobrem as coordenadas X e Y do alvo (Jogador).</li>
+                <li>Calculam a distância total até ele.</li>
+                <li>Normalizam o vetor (dividem o DX e DY pela distância total).</li>
+                <li>Multiplicam o resultado pela própria velocidade. Isso faz com que caminhem numa linha reta exata até o alvo em passos calculados.</li>
+            </ol>
+
+            <h3>Algoritmo de Auto-Mira Dinâmica</h3>
+            <p>Tanto o Jogador quanto o Joventino procuram o inimigo mais próximo. O algoritmo varre a lista de inimigos presentes <strong>na mesma sala</strong> e, usando a função matemática de hipotenusa, filtra e trava a mira no alvo com a menor distância geométrica.</p>
+
+            <h3>Algoritmo do Spawn Seguro (Prevenção de Bugs)</h3>
+            <p>Para impedir que os inimigos "nasçam" dentro de caixas, criamos um algoritmo de validação em laço <code>while</code>. Ele sorteia uma coordenada X/Y, cria um retângulo temporário e testa a colisão. Se bater em um móvel, ele descarta a posição e sorteia outra, limitando-se a 100 tentativas para não travar o processamento do computador.</p>
+        </div>
+    </div>
+</body>
+</html>

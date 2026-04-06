@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matemática - Serafim Rescue Team</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>🎮 Serafim Rescue Team: Documentação & Tutorial</h1>
+        <p>Aprenda a matemática, os algoritmos e a engenharia por trás do jogo.</p>
+    </header>
+
+    <div class="container">
+        <div class="sidebar">
+            <a href="index.html" class="tab-link">1. Fundamentos de Jogos</a>
+            <a href="matematica.html" class="tab-link active">2. Matemática Aplicada</a>
+            <a href="algoritmos.html" class="tab-link">3. Algoritmos Básicos</a>
+            <a href="pygame.html" class="tab-link">4. Python & Pygame</a>
+        </div>
+
+        <div class="content-area">
+            <h2>2. Fundamentos Matemáticos</h2>
+            <p>Em um jogo Top-Down, a geometria e a trigonometria comandam todas as ações.</p>
+
+            <h3>O Teorema de Pitágoras e as "Zonas de Conforto"</h3>
+            <p>Usamos o Teorema de Pitágoras (<code>math.hypot</code>) para calcular a distância exata entre as entidades. Isso nos permitiu criar "Zonas de Conforto" para a Inteligência Artificial:</p>
+            <ul>
+                <li><strong>Joventino:</strong> Se a distância for <code>> 80</code>, ele anda. Caso contrário, ele para (para não esbarrar no jogador).</li>
+                <li><strong>Inimigos:</strong> Se a distância for <code>> 150</code>, eles avançam. Se chegar a 150, eles param de andar e focam apenas em atirar, mantendo uma distância segura.</li>
+            </ul>
+
+            <h3>Trigonometria: Apontando e Movendo (Seno, Cosseno e Atan2)</h3>
+            <p>Usamos a função <code>math.atan2(dy, dx)</code> para descobrir o ângulo exato em que o alvo está. Depois, para mover a bala (ou o personagem inimigo) nessa diagonal perfeita, multiplicamos a velocidade pelo <strong>Cosseno</strong> do ângulo (para o eixo X) e pelo <strong>Seno</strong> (para o eixo Y).</p>
+            <pre><code>
+dx = math.cos(angulo) * velocidade
+dy = math.sin(angulo) * velocidade
+            </code></pre>
+        </div>
+    </div>
+</body>
+</html>

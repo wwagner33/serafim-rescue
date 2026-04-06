@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fundamentos - Serafim Rescue Team</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>🎮 Serafim Rescue Team: Documentação & Tutorial</h1>
+      <p>
+        Aprenda a matemática, os algoritmos e a engenharia por trás do jogo.
+      </p>
+    </header>
+
+    <div class="container">
+      <div class="sidebar">
+        <a href="index.html" class="tab-link active">1. Fundamentos de Jogos</a>
+        <a href="matematica.html" class="tab-link">2. Matemática Aplicada</a>
+        <a href="algoritmos.html" class="tab-link">3. Algoritmos Básicos</a>
+        <a href="pygame.html" class="tab-link">4. Python & Pygame</a>
+      </div>
+
+      <div class="content-area">
+        <h2>1. Fundamentos de Desenvolvimento de Jogos</h2>
+        <p>
+          Todo jogo eletrônico, do <strong>Mario</strong> ao
+          <strong>Call of Duty</strong>, funciona baseado em um princípio
+          fundamental: o <strong>Game Loop</strong> (Laço de Repetição do Jogo).
+        </p>
+
+        <h3>O Game Loop e Estados de Jogo (Game States)</h3>
+        <p>
+          O <strong>Game Loop</strong> é o coração do jogo, repetindo <strong>Eventos</strong>,
+          <strong>Atualizações</strong> e <strong>Renderização</strong> diversas vezes por segundo. Porém, um jogo
+          completo não é apenas a gameplay. Ele possui "Estados".
+        </p>
+        <p>No Serafim Rescue Team, dividimos isso em funções independentes:</p>
+        <ul>
+          <li>
+            <code>menu_principal()</code>: Roda seu próprio loop até o jogador
+            clicar em PLAY.
+          </li>
+          <li>
+            <code>main()</code>: O loop da fase em si. Retorna <i>True</i> ou
+            <i>False</i> quando a missão acaba.
+          </li>
+          <li>
+            <code>tela_fim_jogo()</code>: Pausa a ação, desenha uma tela por
+            cima e aguarda a decisão de repetir ou sair.
+          </li>
+        </ul>
+
+        <h3>Colisões (AABB)</h3>
+        <p>
+          Nosso jogo usa colisões do tipo
+          <strong>AABB (Axis-Aligned Bounding Box)</strong>. Desenhamos
+          retângulos invisíveis ao redor das entidades e o motor do jogo
+          (Pygame) checa se as coordenadas X e Y das bordas do jogador sobrepõem
+          as caixas, paredes ou portas.
+        </p>
+        <p>
+          Usamos isso de forma reversa para as paredes: em vez de bater na
+          parede, verificamos se o centro do jogador <strong>saiu</strong> da
+          área de chão pisável. Se saiu, o movimento é cancelado.
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

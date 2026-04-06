@@ -3,7 +3,7 @@ import math
 import random
 import sys
 
-from config import Entidade, ARMAS, COR_FUNDO, COR_JOGADOR, COR_INIMIGO, COR_OBSTACULO
+from config import Entidade, ARMAS, COR_FUNDO, COR_JOGADOR, COR_ALIADO, COR_INIMIGO, COR_OBSTACULO
 from refem import Refem
 
 pygame.init()
@@ -11,13 +11,16 @@ pygame.mixer.init()
 
 LARGURA, ALTURA = 1200, 700
 TELA = pygame.display.set_mode((LARGURA, ALTURA))
-# Título atualizado conforme o solicitado
 pygame.display.set_caption("Serafim Rescue Team")
 FPS = 60
 
 # ================= CONSTANTES DE BALANCEAMENTO =================
 VIDA_BASE_INIMIGO = 50
-VIDA_JOGADOR = int(VIDA_BASE_INIMIGO * 1.5) # O Jogador tem sempre 50% a mais de vida
+VIDA_JOGADOR = int(VIDA_BASE_INIMIGO * 1.5)
+
+# Globais para Efeitos Sonoros
+SOM_TIRO = None
+SOM_PORTA = None
 
 # ================= CLASSES FILHAS =================
 
@@ -36,7 +39,6 @@ class Jogador(Entidade):
         if dx != 0 or dy != 0:
             self.direcao = math.atan2(dy, dx)
 
-        # Movimento e Colisão no eixo X
         self.rect.x += dx
         for obs in obstaculos:
             if self.rect.colliderect(obs):
@@ -46,7 +48,6 @@ class Jogador(Entidade):
         if not any(area.collidepoint(self.rect.center) for area in areas_pisaveis):
             self.rect.x -= dx
 
-        # Movimento e Colisão no eixo Y
         self.rect.y += dy
         for obs in obstaculos:
             if self.rect.colliderect(obs):
@@ -58,20 +59,92 @@ class Jogador(Entidade):
 
         self.rect.clamp_ip(TELA.get_rect())
 
+
+class Aliado(Entidade):
+    def __init__(self, x, y):
+        super().__init__(x, y, COR_ALIADO, 15, VIDA_JOGADOR) 
+        self.arma_atual = "Revolver"
+        self.municao_maxima = 6 
+        self.municao = self.municao_maxima
+        self.velocidade = 4 
+        self.cooldown_tiro = random.randint(40, 80)
+        self.vivo = True
+
+    def atualizar(self, jogador, inimigos, projeteis, obstaculos):
+        if not self.vivo:
+            return
+
+        self.sala_id = jogador.sala_id
+
+        dist_jogador = math.hypot(jogador.rect.centerx - self.rect.centerx, jogador.rect.centery - self.rect.centery)
+        
+        if dist_jogador > 80: 
+            dx = ((jogador.rect.centerx - self.rect.centerx) / dist_jogador) * self.velocidade
+            dy = ((jogador.rect.centery - self.rect.centery) / dist_jogador) * self.velocidade
+            
+            self.rect.x += dx
+            for obs in obstaculos:
+                if self.rect.colliderect(obs):
+                    if dx > 0: self.rect.right = obs.left
+                    if dx < 0: self.rect.left = obs.right
+                    
+            self.rect.y += dy
+            for obs in obstaculos:
+                if self.rect.colliderect(obs):
+                    if dy > 0: self.rect.bottom = obs.top
+                    if dy < 0: self.rect.top = obs.bottom
+
+        inimigos_visiveis = [ini for ini in inimigos if ini.sala_id == self.sala_id]
+        if inimigos_visiveis and self.municao > 0:
+            alvo = min(inimigos_visiveis, key=lambda ini: math.hypot(ini.rect.centerx - self.rect.centerx, ini.rect.centery - self.rect.centery))
+            
+            self.direcao = math.atan2(alvo.rect.centery - self.rect.centery, alvo.rect.centerx - self.rect.centerx)
+            
+            self.cooldown_tiro -= 1
+            if self.cooldown_tiro <= 0:
+                projeteis.add(Projetil(self.rect.centerx, self.rect.centery, self.direcao, "aliado", self.arma_atual))
+                self.municao -= 1
+                if SOM_TIRO: SOM_TIRO.play() # Som do tiro do Joventino
+                self.cooldown_tiro = random.randint(50, 100) 
+        elif dist_jogador > 80:
+            self.direcao = math.atan2(dy, dx)
+
+
 class Inimigo(Entidade):
     def __init__(self, x, y, sala_id):
         super().__init__(x, y, COR_INIMIGO, 15, VIDA_BASE_INIMIGO)
         self.arma_atual = "Revolver"
         self.municao = ARMAS[self.arma_atual]["municao_max"]
-        self.velocidade = 2
+        self.velocidade = 1 
         self.sala_id = sala_id
         self.direcao = random.uniform(0, math.pi * 2) 
         self.cooldown_tiro = random.randint(60, 120) 
 
+    def mover(self, jogador, obstaculos):
+        if self.sala_id == jogador.sala_id:
+            dist = math.hypot(jogador.rect.centerx - self.rect.centerx, jogador.rect.centery - self.rect.centery)
+            
+            if dist > 150: 
+                dx = math.cos(self.direcao) * self.velocidade
+                dy = math.sin(self.direcao) * self.velocidade
+                
+                self.rect.x += dx
+                for obs in obstaculos:
+                    if self.rect.colliderect(obs):
+                        if dx > 0: self.rect.right = obs.left
+                        if dx < 0: self.rect.left = obs.right
+                        
+                self.rect.y += dy
+                for obs in obstaculos:
+                    if self.rect.colliderect(obs):
+                        if dy > 0: self.rect.bottom = obs.top
+                        if dy < 0: self.rect.top = obs.bottom
+
+
 class Projetil(pygame.sprite.Sprite):
     def __init__(self, x, y, angulo, dono, tipo_arma):
         super().__init__()
-        self.dono = dono
+        self.dono = dono 
         self.arma = ARMAS[tipo_arma]
         self.image = pygame.Surface((8, 8), pygame.SRCALPHA)
         cor_tiro = (255, 0, 0) if dono == "inimigo" else (0, 0, 0)
@@ -97,10 +170,10 @@ class Projetil(pygame.sprite.Sprite):
 
 def gerar_cenario():
     salas = [
-        pygame.Rect(150, 250, 250, 180), # Sala 0
-        pygame.Rect(500, 250, 250, 180), # Sala 1
-        pygame.Rect(850, 250, 200, 180), # Sala 2 (Refém)
-        pygame.Rect(700, 480, 200, 180), # Sala 3
+        pygame.Rect(150, 250, 250, 180), 
+        pygame.Rect(500, 250, 250, 180), 
+        pygame.Rect(850, 250, 200, 180), 
+        pygame.Rect(700, 480, 200, 180), 
     ]
     corredores = [
         pygame.Rect(50, 315, 90, 50),    
@@ -158,16 +231,14 @@ def gerar_cenario():
 # ================= MENU PRINCIPAL =================
 def menu_principal():
     rodando_menu = True
-    # Fontes para o título e botão
     fonte_titulo = pygame.font.SysFont("Courier", 60, bold=True)
     fonte_botao = pygame.font.SysFont("Courier", 30, bold=True)
     
-    # Criando o retângulo do botão PLAY (centralizado)
     largura_botao, altura_botao = 200, 60
     botao_play = pygame.Rect(LARGURA // 2 - largura_botao // 2, ALTURA // 2 + 50, largura_botao, altura_botao)
     
     while rodando_menu:
-        TELA.fill((40, 44, 52)) # Uma cor de fundo mais escura e moderna para o menu
+        TELA.fill((40, 44, 52)) 
         
         mouse_pos = pygame.mouse.get_pos()
         
@@ -177,20 +248,18 @@ def menu_principal():
                 sys.exit()
                 
             if evento.type == pygame.MOUSEBUTTONDOWN:
-                if evento.button == 1: # Clique do botão esquerdo do mouse
+                if evento.button == 1: 
                     if botao_play.collidepoint(mouse_pos):
-                        rodando_menu = False # Encerra o menu para iniciar o jogo
+                        rodando_menu = False 
         
-        # 1. Desenhar Título
         texto_titulo = fonte_titulo.render("SERAFIM RESCUE TEAM", True, (255, 200, 0))
         rect_titulo = texto_titulo.get_rect(center=(LARGURA // 2, ALTURA // 2 - 50))
         TELA.blit(texto_titulo, rect_titulo)
         
-        # 2. Desenhar Botão Play com efeito Hover (muda de cor ao passar o mouse)
         if botao_play.collidepoint(mouse_pos):
-            cor_botao = (0, 200, 0)  # Verde mais claro
+            cor_botao = (0, 200, 0)
         else:
-            cor_botao = (0, 150, 0)  # Verde escuro
+            cor_botao = (0, 150, 0) 
             
         pygame.draw.rect(TELA, cor_botao, botao_play, border_radius=10)
         
@@ -200,15 +269,47 @@ def menu_principal():
         
         pygame.display.flip()
 
+def tela_fim_jogo(vitoria):
+    overlay = pygame.Surface((LARGURA, ALTURA), pygame.SRCALPHA)
+    overlay.fill((0, 0, 0, 180)) 
+    TELA.blit(overlay, (0, 0))
+
+    fonte_titulo = pygame.font.SysFont("Courier", 60, bold=True)
+    fonte_sub = pygame.font.SysFont("Courier", 25, bold=True)
+
+    if vitoria:
+        texto = fonte_titulo.render("MISSÃO CUMPRIDA!", True, (0, 255, 100))
+    else:
+        texto = fonte_titulo.render("MISSÃO FALHOU...", True, (255, 50, 50))
+
+    texto_dica = fonte_sub.render("Pressione [R] para Repetir ou [Q] para Sair", True, (255, 255, 255))
+
+    TELA.blit(texto, texto.get_rect(center=(LARGURA // 2, ALTURA // 2 - 40)))
+    TELA.blit(texto_dica, texto_dica.get_rect(center=(LARGURA // 2, ALTURA // 2 + 40)))
+    pygame.display.flip()
+
+    while True:
+        for evento in pygame.event.get():
+            if evento.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if evento.type == pygame.KEYDOWN:
+                if evento.key == pygame.K_r:
+                    return True  
+                if evento.key == pygame.K_q:
+                    return False 
+
 # ================= LOOP PRINCIPAL DO JOGO =================
 
 def main():
     relogio = pygame.time.Clock()
     jogador = Jogador(90, 340) 
+    joventino = Aliado(60, 340) 
     
     salas, corredores, portas, obstaculos, areas_pisaveis, inimigos, refem = gerar_cenario()
     projeteis = pygame.sprite.Group()
     
+    sala_anterior = -1 # Rastreia transições para tocar o som da porta
     rodando = True
     vitoria = False
     derrota = False
@@ -226,6 +327,7 @@ def main():
                     if jogador.municao > 0:
                         projeteis.add(Projetil(jogador.rect.centerx, jogador.rect.centery, jogador.direcao, "jogador", jogador.arma_atual))
                         jogador.municao -= 1
+                        if SOM_TIRO: SOM_TIRO.play() # Som do tiro do Jogador
                     else:
                         for inimigo in inimigos:
                             if inimigo.sala_id == jogador.sala_id:
@@ -240,19 +342,31 @@ def main():
                 
                 if evento.key == pygame.K_r:
                     jogador.municao = ARMAS[jogador.arma_atual]["municao_max"]
+                
+                if evento.key == pygame.K_j and joventino.vivo:
+                    joventino.municao = joventino.municao_maxima
 
         # 2. Atualizações e Lógica
         teclas = pygame.key.get_pressed()
         jogador.mover(teclas, obstaculos, areas_pisaveis) 
+        
+        joventino.atualizar(jogador, inimigos, projeteis, obstaculos)
+
         projeteis.update()
 
+        # Checagem de sala e som da porta
         jogador.sala_id = -1
         for i, sala in enumerate(salas):
             if jogador.rect.colliderect(sala):
                 jogador.sala_id = i
                 break
 
-        # ================= AUTO-MIRA =================
+        # Se mudou do corredor (-1) para dentro de uma sala
+        if jogador.sala_id != -1 and sala_anterior == -1:
+            if SOM_PORTA: SOM_PORTA.play()
+        sala_anterior = jogador.sala_id
+
+        # ================= AUTO-MIRA JOGADOR =================
         if jogador.sala_id != -1: 
             inimigos_visiveis = [ini for ini in inimigos if ini.sala_id == jogador.sala_id]
             if inimigos_visiveis:
@@ -262,6 +376,8 @@ def main():
         # ================= IA DOS INIMIGOS =================
         for inimigo in inimigos:
             if inimigo.sala_id == jogador.sala_id:
+                inimigo.mover(jogador, obstaculos)
+
                 angulo_para_jogador = math.atan2(jogador.rect.centery - inimigo.rect.centery, 
                                                  jogador.rect.centerx - inimigo.rect.centerx)
                 inimigo.direcao = angulo_para_jogador
@@ -269,13 +385,14 @@ def main():
                 inimigo.cooldown_tiro -= 1
                 if inimigo.cooldown_tiro <= 0:
                     projeteis.add(Projetil(inimigo.rect.centerx, inimigo.rect.centery, inimigo.direcao, "inimigo", inimigo.arma_atual))
+                    if SOM_TIRO: SOM_TIRO.play() # Som do tiro dos Inimigos
                     inimigo.cooldown_tiro = random.randint(60, 120)
 
         # ================= COLISÕES DE TIROS =================
         for projetil in projeteis:
             hit_parede = projetil.rect.collidelist(obstaculos) != -1
             
-            if projetil.dono == "jogador":
+            if projetil.dono in ["jogador", "aliado"]:
                 hit = pygame.sprite.spritecollideany(projetil, inimigos)
                 if hit:
                     hit.vida -= projetil.arma["dano"]
@@ -285,16 +402,24 @@ def main():
                     projetil.kill()
                     
             elif projetil.dono == "inimigo":
+                acertou_alguem = False
+                
                 if projetil.rect.colliderect(jogador.rect):
                     jogador.vida -= projetil.arma["dano"]
-                    projetil.kill()
+                    acertou_alguem = True
                     if jogador.vida <= 0:
                         derrota = True
                         rodando = False
-                elif hit_parede:
+                
+                elif joventino.vivo and projetil.rect.colliderect(joventino.rect):
+                    joventino.vida -= projetil.arma["dano"]
+                    acertou_alguem = True
+                    if joventino.vida <= 0:
+                        joventino.vivo = False 
+                
+                if acertou_alguem or hit_parede:
                     projetil.kill()
 
-        # Lógica do Refém
         if not refem.resgatado and jogador.rect.colliderect(refem.rect):
             refem.resgatado = True
 
@@ -322,6 +447,9 @@ def main():
 
         jogador.desenhar(TELA)
         
+        if joventino.vivo:
+            joventino.desenhar(TELA)
+        
         for inimigo in inimigos:
             if inimigo.sala_id == jogador.sala_id:
                 inimigo.desenhar(TELA)
@@ -335,31 +463,59 @@ def main():
 
         projeteis.draw(TELA)
 
-        fonte = pygame.font.SysFont("Courier", 20, bold=True)
-        texto_municao = f"Munição: {jogador.municao}/{ARMAS[jogador.arma_atual]['municao_max']}"
+        fonte = pygame.font.SysFont("Courier", 18, bold=True)
+        
+        texto_jogador = f"Munição: {jogador.municao}/{ARMAS[jogador.arma_atual]['municao_max']}"
         if jogador.municao == 0:
-            texto_municao += " [R: RECARREGAR | ESPAÇO: SOCO]"
-            
-        ui_texto = fonte.render(f"{texto_municao} | Arma: {jogador.arma_atual} | Vida: {int(jogador.vida)}", True, (0, 0, 0))
-        TELA.blit(ui_texto, (20, 20))
+            texto_jogador += " [R: RECARREGAR]"
+        
+        ui_texto = fonte.render(f"JOGADOR -> {texto_jogador} | Vida: {max(0, int(jogador.vida))}", True, (0, 0, 0))
+        TELA.blit(ui_texto, (20, 10))
+        
+        if joventino.vivo:
+            texto_jov = f"Munição: {joventino.municao}/{joventino.municao_maxima}"
+            if joventino.municao == 0:
+                texto_jov += " [TECLe 'J' PARA RECARREGAR O ALIADO]"
+            ui_jov = fonte.render(f"JOVENTINO -> {texto_jov} | Vida: {max(0, int(joventino.vida))}", True, (0, 100, 150))
+            TELA.blit(ui_jov, (20, 35))
+        else:
+            ui_jov = fonte.render("JOVENTINO CAIU EM COMBATE!", True, (200, 0, 0))
+            TELA.blit(ui_jov, (20, 35))
 
         pygame.display.flip()
         relogio.tick(FPS)
 
-    pygame.quit()
-    
-    if vitoria:
-        print("\n" + "="*50)
-        print("🏆 VITÓRIA! O refém foi extraído com segurança.")
-        print("="*50 + "\n")
-    elif derrota:
-        print("\n" + "="*50)
-        print("💀 GAME OVER! Você foi abatido em combate.")
-        print("="*50 + "\n")
-    
-    sys.exit()
+    return tela_fim_jogo(vitoria)
+
+# ================= INICIALIZAÇÃO =================
+def carregar_sons():
+    global SOM_TIRO, SOM_PORTA
+    try:
+        # Do Portal FreeSound:
+        # Tiro: https://freesound.org/people/danlucaz/sounds/569847/
+        # Porta: https://freesound.org/people/pagancow/sounds/15419/
+        SOM_TIRO = pygame.mixer.Sound("tiro.wav")
+        SOM_TIRO.set_volume(0.3)
+        SOM_PORTA = pygame.mixer.Sound("porta.wav")
+        SOM_PORTA.set_volume(0.5)
+    except Exception as e:
+        print(f"Aviso ao carregar os sons de efeito: {e}")
 
 if __name__ == "__main__":
-    # Agora chamamos o Menu antes de chamar o Jogo
+    carregar_sons()
+    
+    try:
+        # Do portal PixBay
+        # Trilha Sonora: (Suspense) https://pixabay.com/music/suspense-suspense-tension-510528/
+        # Music by AtlasAudio from Pixabay
+        pygame.mixer.music.load("trilha.mp3") 
+        pygame.mixer.music.set_volume(0.4) 
+        pygame.mixer.music.play(-1) 
+    except Exception as e:
+        print(f"Aviso ao carregar a trilha: {e}")
+
     menu_principal()
-    main()
+    
+    jogar_novamente = True
+    while jogar_novamente:
+        jogar_novamente = main()
