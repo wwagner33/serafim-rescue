@@ -39,6 +39,7 @@ class Jogador(Entidade):
         if dx != 0 or dy != 0:
             self.direcao = math.atan2(dy, dx)
 
+        # Movimento e Colisão X
         self.rect.x += dx
         for obs in obstaculos:
             if self.rect.colliderect(obs):
@@ -48,6 +49,7 @@ class Jogador(Entidade):
         if not any(area.collidepoint(self.rect.center) for area in areas_pisaveis):
             self.rect.x -= dx
 
+        # Movimento e Colisão Y
         self.rect.y += dy
         for obs in obstaculos:
             if self.rect.colliderect(obs):
@@ -62,11 +64,11 @@ class Jogador(Entidade):
 
 class Aliado(Entidade):
     def __init__(self, x, y):
-        super().__init__(x, y, COR_ALIADO, 15, VIDA_JOGADOR) 
+        super().__init__(x, y, COR_ALIADO, 15, VIDA_JOGADOR) # Mesmo life do jogador
         self.arma_atual = "Revolver"
-        self.municao_maxima = 6 
+        self.municao_maxima = 6 # Poucas balas para o Joventino
         self.municao = self.municao_maxima
-        self.velocidade = 4 
+        self.velocidade = 4 # Um pouco mais lento que o jogador
         self.cooldown_tiro = random.randint(40, 80)
         self.vivo = True
 
@@ -76,12 +78,15 @@ class Aliado(Entidade):
 
         self.sala_id = jogador.sala_id
 
+        # 1. Movimento Didático (Seguir o jogador)
         dist_jogador = math.hypot(jogador.rect.centerx - self.rect.centerx, jogador.rect.centery - self.rect.centery)
         
+        # Só se move se estiver longe do jogador
         if dist_jogador > 80: 
             dx = ((jogador.rect.centerx - self.rect.centerx) / dist_jogador) * self.velocidade
             dy = ((jogador.rect.centery - self.rect.centery) / dist_jogador) * self.velocidade
             
+            # Movimento e colisão básica (para não atravessar caixas)
             self.rect.x += dx
             for obs in obstaculos:
                 if self.rect.colliderect(obs):
@@ -94,19 +99,21 @@ class Aliado(Entidade):
                     if dy > 0: self.rect.bottom = obs.top
                     if dy < 0: self.rect.top = obs.bottom
 
+        # 2. IA de Tiro Didática
         inimigos_visiveis = [ini for ini in inimigos if ini.sala_id == self.sala_id]
         if inimigos_visiveis and self.municao > 0:
             alvo = min(inimigos_visiveis, key=lambda ini: math.hypot(ini.rect.centerx - self.rect.centerx, ini.rect.centery - self.rect.centery))
             
+            # Aponta para o inimigo
             self.direcao = math.atan2(alvo.rect.centery - self.rect.centery, alvo.rect.centerx - self.rect.centerx)
             
             self.cooldown_tiro -= 1
             if self.cooldown_tiro <= 0:
                 projeteis.add(Projetil(self.rect.centerx, self.rect.centery, self.direcao, "aliado", self.arma_atual))
                 self.municao -= 1
-                if SOM_TIRO: SOM_TIRO.play() # Som do tiro do Joventino
-                self.cooldown_tiro = random.randint(50, 100) 
+                self.cooldown_tiro = random.randint(50, 100) # Demora um pouco para atirar de novo
         elif dist_jogador > 80:
+            # Se não há inimigos, a arma aponta para onde ele está andando
             self.direcao = math.atan2(dy, dx)
 
 
@@ -115,16 +122,19 @@ class Inimigo(Entidade):
         super().__init__(x, y, COR_INIMIGO, 15, VIDA_BASE_INIMIGO)
         self.arma_atual = "Revolver"
         self.municao = ARMAS[self.arma_atual]["municao_max"]
-        self.velocidade = 1 
+        self.velocidade = 1 # Mais lentos para dar tempo de reagir
         self.sala_id = sala_id
         self.direcao = random.uniform(0, math.pi * 2) 
         self.cooldown_tiro = random.randint(60, 120) 
 
     def mover(self, jogador, obstaculos):
+        # Estratégia didática de perseguição simples
         if self.sala_id == jogador.sala_id:
             dist = math.hypot(jogador.rect.centerx - self.rect.centerx, jogador.rect.centery - self.rect.centery)
             
+            # Se estiver mais longe que 150 pixels, tenta se aproximar
             if dist > 150: 
+                # Usa a mesma direção que ele está apontando (que já é na direção do jogador)
                 dx = math.cos(self.direcao) * self.velocidade
                 dy = math.sin(self.direcao) * self.velocidade
                 
@@ -144,7 +154,7 @@ class Inimigo(Entidade):
 class Projetil(pygame.sprite.Sprite):
     def __init__(self, x, y, angulo, dono, tipo_arma):
         super().__init__()
-        self.dono = dono 
+        self.dono = dono # Pode ser "jogador", "aliado" ou "inimigo"
         self.arma = ARMAS[tipo_arma]
         self.image = pygame.Surface((8, 8), pygame.SRCALPHA)
         cor_tiro = (255, 0, 0) if dono == "inimigo" else (0, 0, 0)
@@ -304,7 +314,7 @@ def tela_fim_jogo(vitoria):
 def main():
     relogio = pygame.time.Clock()
     jogador = Jogador(90, 340) 
-    joventino = Aliado(60, 340) 
+    joventino = Aliado(60, 340) # Instancia o Joventino um pouco atrás do jogador
     
     salas, corredores, portas, obstaculos, areas_pisaveis, inimigos, refem = gerar_cenario()
     projeteis = pygame.sprite.Group()
@@ -343,6 +353,7 @@ def main():
                 if evento.key == pygame.K_r:
                     jogador.municao = ARMAS[jogador.arma_atual]["municao_max"]
                 
+                # NOVO EVENTO: Recarregar a arma do Joventino
                 if evento.key == pygame.K_j and joventino.vivo:
                     joventino.municao = joventino.municao_maxima
 
@@ -350,6 +361,7 @@ def main():
         teclas = pygame.key.get_pressed()
         jogador.mover(teclas, obstaculos, areas_pisaveis) 
         
+        # Atualiza a lógica do aliado Joventino
         joventino.atualizar(jogador, inimigos, projeteis, obstaculos)
 
         projeteis.update()
@@ -361,11 +373,6 @@ def main():
                 jogador.sala_id = i
                 break
 
-        # Se mudou do corredor (-1) para dentro de uma sala
-        if jogador.sala_id != -1 and sala_anterior == -1:
-            if SOM_PORTA: SOM_PORTA.play()
-        sala_anterior = jogador.sala_id
-
         # ================= AUTO-MIRA JOGADOR =================
         if jogador.sala_id != -1: 
             inimigos_visiveis = [ini for ini in inimigos if ini.sala_id == jogador.sala_id]
@@ -376,6 +383,7 @@ def main():
         # ================= IA DOS INIMIGOS =================
         for inimigo in inimigos:
             if inimigo.sala_id == jogador.sala_id:
+                # Inimigo se movimenta em direção ao jogador
                 inimigo.mover(jogador, obstaculos)
 
                 angulo_para_jogador = math.atan2(jogador.rect.centery - inimigo.rect.centery, 
@@ -392,6 +400,7 @@ def main():
         for projetil in projeteis:
             hit_parede = projetil.rect.collidelist(obstaculos) != -1
             
+            # Tiros do Jogador OU do Aliado dão dano nos inimigos
             if projetil.dono in ["jogador", "aliado"]:
                 hit = pygame.sprite.spritecollideany(projetil, inimigos)
                 if hit:
@@ -401,6 +410,7 @@ def main():
                 elif hit_parede:
                     projetil.kill()
                     
+            # Tiros do Inimigo dão dano no Jogador OU no Aliado
             elif projetil.dono == "inimigo":
                 acertou_alguem = False
                 
@@ -415,7 +425,7 @@ def main():
                     joventino.vida -= projetil.arma["dano"]
                     acertou_alguem = True
                     if joventino.vida <= 0:
-                        joventino.vivo = False 
+                        joventino.vivo = False # Joventino caiu!
                 
                 if acertou_alguem or hit_parede:
                     projetil.kill()
@@ -463,6 +473,7 @@ def main():
 
         projeteis.draw(TELA)
 
+        # UI Atualizada com os dados do Joventino
         fonte = pygame.font.SysFont("Courier", 18, bold=True)
         
         texto_jogador = f"Munição: {jogador.municao}/{ARMAS[jogador.arma_atual]['municao_max']}"
@@ -502,18 +513,6 @@ def carregar_sons():
         print(f"Aviso ao carregar os sons de efeito: {e}")
 
 if __name__ == "__main__":
-    carregar_sons()
-    
-    try:
-        # Do portal PixBay
-        # Trilha Sonora: (Suspense) https://pixabay.com/music/suspense-suspense-tension-510528/
-        # Music by AtlasAudio from Pixabay
-        pygame.mixer.music.load("trilha.mp3") 
-        pygame.mixer.music.set_volume(0.4) 
-        pygame.mixer.music.play(-1) 
-    except Exception as e:
-        print(f"Aviso ao carregar a trilha: {e}")
-
     menu_principal()
     
     jogar_novamente = True
