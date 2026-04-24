@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fundamentos - Serafim Rescue Team</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>🎮 <em>Serafim Rescue Team</em>: Documentação e Tutorial</h1>
+    
+    </header>
+
+    <div class="container">
+      <div class="sidebar">
+        <a href="index.html" class="tab-link active">1. Fundamentos e Arquitetura</a>
+        <a href="matematica.html" class="tab-link">2. Matemática Aplicada</a>
+        <a href="algoritmos.html" class="tab-link">3. Algoritmos e IA</a>
+        <a href="pygame.html" class="tab-link">4. Classes e Pygame</a>
+        <a href="atividade.html" class="tab-link">5. Atividade Prática</a>
+      </div>
+
+      <div class="content-area">
+        <h2>1. Fundamentos e Arquitetura do Projeto</h2>
+        
+        <h3>O Game Loop e Estados de Jogo (Game States)</h3>
+        <p>O <strong>Game Loop</strong> é o coração do jogo, executando a leitura de teclado, a lógica e o desenho na tela 60 vezes por segundo (<code>FPS = 60</code>). Em nosso projeto, isolamos os estados do jogo em funções principais no <code>main.py</code>:</p>
+        <ul>
+          <li><code>menu_principal()</code>: Roda o loop da tela inicial, aguardando o clique no botão "PLAY".</li>
+          <li><code>main()</code>: O loop da fase principal. Retorna <i>True</i> (repetir) ou <i>False</i> (sair).</li>
+          <li><code>tela_fim_jogo(vitoria)</code>: Pausa a ação, exibe o resultado da missão (Sucesso/Falha) e aguarda o input do jogador.</li>
+        </ul>
+
+        <h3>Arquitetura Limpa (Modularização)</h3>
+        <p>Para não criar um arquivo gigante e confuso, dividimos a responsabilidade do código em três módulos:</p>
+        <ul>
+            <li><strong><code>config.py</code></strong>: Guarda as variáveis globais (cores, constantes de balanceamento), o dicionário de <code>ARMAS</code> e a Classe mãe <code>Entidade</code>. Funciona como o "cérebro" das regras de negócio.</li>
+            <li><strong><code>refem.py</code></strong>: Contém isoladamente a lógica do refém, herdando as regras do <i>config.py</i>.</li>
+            <li><strong><code>main.py</code></strong>: Junta tudo. Aqui ficam as classes específicas (Jogador, Inimigo, Aliado), a geração do nível e o motor gráfico do Pygame.</li>
+        </ul>
+
+        <h3>A Função <code>gerar_cenario()</code></h3>
+        <p>Essa função atua como nosso <i>Level Designer</i>. Ela cria listas de objetos <code>pygame.Rect</code> que representam as salas, os corredores, as portas e os obstáculos. A união das salas e corredores forma a lista <code>areas_pisaveis</code>, que restringe por onde as entidades podem andar.</p>
+      </div>
+    </div>
+    <footer>
+      <p>Copyleft 2026 Serafim Rescue Team por Wellington Sarmento e Matheus Serafim</p>
+    </footer>
+  </body>
+</html>

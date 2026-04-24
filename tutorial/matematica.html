@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matemática - Serafim Rescue Team</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>🎮 Serafim Rescue Team: Documentação & Tutorial</h1>
+        <p>Aprenda a matemática, os algoritmos e a engenharia por trás do jogo.</p>
+    </header>
+
+    <div class="container">
+        <div class="sidebar">
+            <a href="index.html" class="tab-link">1. Fundamentos e Arquitetura</a>
+            <a href="matematica.html" class="tab-link active">2. Matemática Aplicada</a>
+            <a href="algoritmos.html" class="tab-link">3. Algoritmos e IA</a>
+            <a href="pygame.html" class="tab-link">4. Classes e Pygame</a>
+            <a href="atividade.html" class="tab-link">5. Atividade Prática</a>
+        </div>
+
+        <div class="content-area">
+            <h2>2. Fundamentos Matemáticos</h2>
+            <p>Em um jogo Top-Down, onde visão do jogador está posicionada de cima para baixo, a geometria e a trigonometria comandam as ações físicas do jogo.</p>
+
+            <h3>O Teorema de Pitágoras e Zonas de Ação</h3>
+            <p>Usamos o Teorema de Pitágoras (<code>math.hypot(dx, dy)</code>) para calcular a distância exata entre as entidades. Vemos isso aplicado em vários métodos:</p>
+            <ul>
+                <li>Na classe <strong>Aliado</strong> (<code>atualizar()</code>): Se a distância for <code>> 80</code>, ele anda em direção ao jogador. Se for menor, ele para.</li>
+                <li>No <strong>Combate Corpo-a-Corpo</strong>: O soco só acerta se a distância entre o jogador e o inimigo for menor ou igual ao alcance da arma (40 pixels).</li>
+            </ul>
+
+            <h3>Trigonometria: Atan2, Seno e Cosseno</h3>
+            <p>Para o desenho da arma giratória no método <code>desenhar()</code> da classe <code>Entidade</code>, e no cálculo da física do <code>Projetil</code>, precisamos descobrir o ângulo de visão.</p>
+            <p>Usamos <code>math.atan2(y, x)</code> para descobrir o ângulo (em radianos) entre o atirador e o alvo. Na hora de mover o tiro na diagonal perfeitamente calculada, multiplicamos a velocidade da arma pelo <strong>Cosseno</strong> (para mover no eixo X) e pelo <strong>Seno</strong> (para mover no eixo Y):</p>
+            <pre><code>
+self.dx = math.cos(angulo) * self.arma["vel_tiro"]
+self.dy = math.sin(angulo) * self.arma["vel_tiro"]
+            </code></pre>
+        </div>
+    </div>
+</body>
+</html>

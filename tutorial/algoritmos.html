@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algoritmos - Serafim Rescue Team</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>🎮 Serafim Rescue Team: Documentação & Tutorial</h1>
+        <p>Aprenda a matemática, os algoritmos e a engenharia por trás do jogo.</p>
+    </header>
+
+    <div class="container">
+        <div class="sidebar">
+            <a href="index.html" class="tab-link">1. Fundamentos e Arquitetura</a>
+            <a href="matematica.html" class="tab-link">2. Matemática Aplicada</a>
+            <a href="algoritmos.html" class="tab-link active">3. Algoritmos e IA</a>
+            <a href="pygame.html" class="tab-link">4. Classes e Pygame</a>
+            <a href="atividade.html" class="tab-link">5. Atividade Prática</a>
+        </div>
+
+        <div class="content-area">
+            <h2>3. Algoritmos e Lógicas de IA</h2>
+            
+            <h3>Steering Behaviors (Perseguição Básica)</h3>
+            <p>Os métodos <code>mover()</code> (do Inimigo) e <code>atualizar()</code> (do Aliado) usam um algoritmo clássico de perseguição linear usando vetores:</p>
+            <ol>
+                <li>Calculam a distância total até o alvo usando a hipotenusa.</li>
+                <li><strong>Normalizam o vetor</strong> dividindo a distância nos eixos (DX e DY) pela distância total.</li>
+                <li>Multiplicam o resultado pela <code>velocidade</code>. O personagem andará em linha reta exata até o alvo sem acelerar bizarramente nas diagonais.</li>
+            </ol>
+
+            <h3>Algoritmo de Auto-Mira (Nearest Neighbor)</h3>
+            <p>O jogo implementa um sistema inteligente e otimizado de assistência de mira. Ele cria uma lista (usando <i>List Comprehension</i> no Python) apenas com os inimigos que compartilham o mesmo <code>sala_id</code> do jogador. Após isso, a função nativa <code>min()</code> encontra o alvo com a menor distância geométrica e "trava" o vetor de direção nele.</p>
+
+            <h3>Algoritmo de Spawn Seguro</h3>
+            <p>A função aninhada <code>espalhar_inimigos()</code> garante que inimigos nunca "nasçam" dentro de paredes. Ela usa um laço <code>while</code> que sorteia um ponto (X, Y) aleatório, simula a <i>hitbox</i> (caixa de colisão) do inimigo e checa se bate com a lista de <code>obstaculos</code>. Se bater, rejeita e tenta de novo (limitado a 100 tentativas de segurança).</p>
+        </div>
+    </div>
+</body>
+</html>

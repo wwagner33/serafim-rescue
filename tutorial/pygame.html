@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pygame - Serafim Rescue Team</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>🎮 Serafim Rescue Team: Documentação & Tutorial</h1>
+        <p>Aprenda a matemática, os algoritmos e a engenharia por trás do jogo.</p>
+    </header>
+
+    <div class="container">
+        <div class="sidebar">
+            <a href="index.html" class="tab-link">1. Fundamentos e Arquitetura</a>
+            <a href="matematica.html" class="tab-link">2. Matemática Aplicada</a>
+            <a href="algoritmos.html" class="tab-link">3. Algoritmos e IA</a>
+            <a href="pygame.html" class="tab-link active">4. Classes e Pygame</a>
+            <a href="atividade.html" class="tab-link">5. Atividade Prática</a>
+        </div>
+
+        <div class="content-area">
+            <h2>4. Classes e Recursos do Pygame</h2>
+            
+            <h3>Programação Orientada a Objetos (POO)</h3>
+            <p>O Serafim Rescue Team faz uso extensivo do conceito de <strong>Herança</strong> para poupar código:</p>
+            <ul>
+                <li><strong>Classe Base <code>Entidade</code>:</strong> Fica no arquivo <i>config.py</i>. Ela define como desenhar os círculos dos personagens, as barras de vida e o traço preto da arma.</li>
+                <li><strong>Classes Filhas:</strong> <code>Jogador</code>, <code>Aliado</code>, <code>Inimigo</code> e <code>Refem</code> herdam de Entidade com o comando <code>super().__init__()</code>. Cada uma só precisa se preocupar com seus próprios comportamentos (como se mover, que cor ter e quanta vida possuir).</li>
+            </ul>
+
+            <h3>A Classe Projetil e os Sprite Groups</h3>
+            <p>Balas no jogo são instâncias da classe <code>Projetil</code>, que herda do nativo <code>pygame.sprite.Sprite</code>. Gerenciamos elas através do <code>pygame.sprite.Group()</code>. Com isso, basta chamar <code>projeteis.update()</code> uma única vez no loop, e o motor gráfico recalcula a física de centenas de balas na tela simultaneamente.</p>
+
+            <h3>Colisão Restritiva <code>clamp_ip</code></h3>
+            <p>A segurança máxima para manter o jogador na tela acontece graças ao método nativo <code>self.rect.clamp_ip(TELA.get_rect())</code>. Ele garante brutalmente que as coordenadas X e Y do retângulo do Jogador não excedam os limites (1200x700) definidos para a janela principal.</p>
+        </div>
+    </div>
+</body>
+</html>

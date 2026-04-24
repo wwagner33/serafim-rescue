@@ -16,7 +16,11 @@ FPS = 60
 
 # ================= CONSTANTES DE BALANCEAMENTO =================
 VIDA_BASE_INIMIGO = 50
-VIDA_JOGADOR = int(VIDA_BASE_INIMIGO * 1.5) # O Jogador tem sempre 50% a mais de vida
+VIDA_JOGADOR = int(VIDA_BASE_INIMIGO * 1.5)
+
+# Globais para Efeitos Sonoros
+SOM_TIRO = None
+SOM_PORTA = None
 
 # ================= CLASSES FILHAS =================
 
@@ -176,10 +180,10 @@ class Projetil(pygame.sprite.Sprite):
 
 def gerar_cenario():
     salas = [
-        pygame.Rect(150, 250, 250, 180), # Sala 0
-        pygame.Rect(500, 250, 250, 180), # Sala 1
-        pygame.Rect(850, 250, 200, 180), # Sala 2 (Refém)
-        pygame.Rect(700, 480, 200, 180), # Sala 3
+        pygame.Rect(150, 250, 250, 180), 
+        pygame.Rect(500, 250, 250, 180), 
+        pygame.Rect(850, 250, 200, 180), 
+        pygame.Rect(700, 480, 200, 180), 
     ]
     corredores = [
         pygame.Rect(50, 315, 90, 50),    
@@ -275,6 +279,36 @@ def menu_principal():
         
         pygame.display.flip()
 
+def tela_fim_jogo(vitoria):
+    overlay = pygame.Surface((LARGURA, ALTURA), pygame.SRCALPHA)
+    overlay.fill((0, 0, 0, 180)) 
+    TELA.blit(overlay, (0, 0))
+
+    fonte_titulo = pygame.font.SysFont("Courier", 60, bold=True)
+    fonte_sub = pygame.font.SysFont("Courier", 25, bold=True)
+
+    if vitoria:
+        texto = fonte_titulo.render("MISSÃO CUMPRIDA!", True, (0, 255, 100))
+    else:
+        texto = fonte_titulo.render("MISSÃO FALHOU...", True, (255, 50, 50))
+
+    texto_dica = fonte_sub.render("Pressione [R] para Repetir ou [Q] para Sair", True, (255, 255, 255))
+
+    TELA.blit(texto, texto.get_rect(center=(LARGURA // 2, ALTURA // 2 - 40)))
+    TELA.blit(texto_dica, texto_dica.get_rect(center=(LARGURA // 2, ALTURA // 2 + 40)))
+    pygame.display.flip()
+
+    while True:
+        for evento in pygame.event.get():
+            if evento.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if evento.type == pygame.KEYDOWN:
+                if evento.key == pygame.K_r:
+                    return True  
+                if evento.key == pygame.K_q:
+                    return False 
+
 # ================= LOOP PRINCIPAL DO JOGO =================
 
 def main():
@@ -285,6 +319,7 @@ def main():
     salas, corredores, portas, obstaculos, areas_pisaveis, inimigos, refem = gerar_cenario()
     projeteis = pygame.sprite.Group()
     
+    sala_anterior = -1 # Rastreia transições para tocar o som da porta
     rodando = True
     vitoria = False
     derrota = False
@@ -302,6 +337,7 @@ def main():
                     if jogador.municao > 0:
                         projeteis.add(Projetil(jogador.rect.centerx, jogador.rect.centery, jogador.direcao, "jogador", jogador.arma_atual))
                         jogador.municao -= 1
+                        if SOM_TIRO: SOM_TIRO.play() # Som do tiro do Jogador
                     else:
                         for inimigo in inimigos:
                             if inimigo.sala_id == jogador.sala_id:
@@ -330,6 +366,7 @@ def main():
 
         projeteis.update()
 
+        # Checagem de sala e som da porta
         jogador.sala_id = -1
         for i, sala in enumerate(salas):
             if jogador.rect.colliderect(sala):
@@ -356,6 +393,7 @@ def main():
                 inimigo.cooldown_tiro -= 1
                 if inimigo.cooldown_tiro <= 0:
                     projeteis.add(Projetil(inimigo.rect.centerx, inimigo.rect.centery, inimigo.direcao, "inimigo", inimigo.arma_atual))
+                    if SOM_TIRO: SOM_TIRO.play() # Som do tiro dos Inimigos
                     inimigo.cooldown_tiro = random.randint(60, 120)
 
         # ================= COLISÕES DE TIROS =================
@@ -392,7 +430,6 @@ def main():
                 if acertou_alguem or hit_parede:
                     projetil.kill()
 
-        # Lógica do Refém
         if not refem.resgatado and jogador.rect.colliderect(refem.rect):
             refem.resgatado = True
 
@@ -459,19 +496,25 @@ def main():
         pygame.display.flip()
         relogio.tick(FPS)
 
-    pygame.quit()
-    
-    if vitoria:
-        print("\n" + "="*50)
-        print("🏆 VITÓRIA! O refém foi extraído com segurança.")
-        print("="*50 + "\n")
-    elif derrota:
-        print("\n" + "="*50)
-        print("💀 GAME OVER! Você foi abatido em combate.")
-        print("="*50 + "\n")
-    
-    sys.exit()
+    return tela_fim_jogo(vitoria)
+
+# ================= INICIALIZAÇÃO =================
+def carregar_sons():
+    global SOM_TIRO, SOM_PORTA
+    try:
+        # Do Portal FreeSound:
+        # Tiro: https://freesound.org/people/danlucaz/sounds/569847/
+        # Porta: https://freesound.org/people/pagancow/sounds/15419/
+        SOM_TIRO = pygame.mixer.Sound("tiro.wav")
+        SOM_TIRO.set_volume(0.3)
+        SOM_PORTA = pygame.mixer.Sound("porta.wav")
+        SOM_PORTA.set_volume(0.5)
+    except Exception as e:
+        print(f"Aviso ao carregar os sons de efeito: {e}")
 
 if __name__ == "__main__":
     menu_principal()
-    main()
+    
+    jogar_novamente = True
+    while jogar_novamente:
+        jogar_novamente = main()
